@@ -19,7 +19,6 @@ La aplicación se compone de 5 servicios contenerizados que colaboran para ofrec
 * **Result App**: Un segundo frontend web que consulta la base de datos y muestra los resultados en vivo.
 
 ![Diagrama de Arquitectura de Microservicios en Kubernetes](images/arquitectura-k8s.png)
-*(Nota: Se recomienda crear un diagrama simple que muestre los 5 componentes y cómo se comunican entre sí y guardarlo en una carpeta `images`)*
 
 ---
 
