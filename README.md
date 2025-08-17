@@ -22,7 +22,7 @@ La aplicación se compone de 5 servicios contenerizados que colaboran para ofrec
 
 ---
 
-### 💡 Logros y Habilidades Demostradas (Fórmula XYZ)
+### 💡 Logros y Habilidades Demostradas
 
 * **Orquesté una aplicación completa de 5 microservicios**, garantizando la alta disponibilidad y el auto-reparado de cada componente, mediante la escritura de manifiestos declarativos para **Deployments** de Kubernetes.
 
