@@ -52,8 +52,8 @@ La aplicación se compone de 5 servicios contenerizados que colaboran para ofrec
 **Pasos:**
 1.  Clona este repositorio:
     ```bash
-    git clone [https://github.com/tu-usuario/tu-repositorio.git](https://github.com/tu-usuario/tu-repositorio.git)
-    cd tu-repositorio
+    git clone https://github.com/ualia946/k8s-voting-app-orchestration
+    cd k8s-voting-app-orchestration
     ```
 
 2.  Aplica todos los manifiestos de forma recursiva:
