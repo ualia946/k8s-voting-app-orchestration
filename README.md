@@ -4,7 +4,7 @@
 
 Este repositorio contiene un conjunto de manifiestos de Kubernetes para desplegar una aplicación de votación distribuida, basada en una arquitectura de microservicios. El proyecto demuestra la orquestación de contenedores, la configuración de redes internas y la gestión de la configuración y los secretos en un entorno de Kubernetes.
 
-**➡️ [Ver la Documentación Técnica Detallada](DOCUMENTACION_DETALLADA.md)** 
+**➡️ [Ver la Documentación Técnica Detallada](DOCUMENTACION_DETALLADA.md)**
 
 ---
 
@@ -19,6 +19,24 @@ La aplicación se compone de 5 servicios contenerizados que colaboran para ofrec
 * **Result App**: Un segundo frontend web que consulta la base de datos y muestra los resultados en vivo.
 
 ![Diagrama de Arquitectura de Microservicios en Kubernetes](images/arquitectura-k8s.png)
+
+---
+
+### 🖼️ Aplicación en Funcionamiento
+
+Una vez desplegada, la aplicación expone dos interfaces web accesibles para el usuario.
+
+#### **Interfaz de Votación**
+La página principal donde los usuarios pueden emitir su voto.
+
+![Interfaz de la Aplicación de Votación](images/vote-app-ui.png)
+*(Nota: Reemplaza esto con una captura de pantalla de tu aplicación de votación funcionando).*
+
+#### **Interfaz de Resultados**
+La página que se conecta a la base de datos PostgreSQL para mostrar los resultados de la votación en tiempo real.
+
+![Interfaz de la Aplicación de Resultados](images/result-app-ui.png)
+*(Nota: Reemplaza esto con una captura de pantalla de tu aplicación de resultados funcionando).*
 
 ---
 
@@ -39,7 +57,7 @@ La aplicación se compone de 5 servicios contenerizados que colaboran para ofrec
 * **Orquestación**: Kubernetes (Minikube)
 * **Contenerización**: Docker
 * **Bases de Datos**: PostgreSQL, Redis
-* **CI/CD**: `kubectl` para la aplicación de manifiestos
+* **Despliegue**: `kubectl` para la aplicación de manifiestos
 
 ---
 
@@ -52,7 +70,7 @@ La aplicación se compone de 5 servicios contenerizados que colaboran para ofrec
 **Pasos:**
 1.  Clona este repositorio:
     ```bash
-    git clone https://github.com/ualia946/k8s-voting-app-orchestration
+    git clone [https://github.com/ualia946/k8s-voting-app-orchestration](https://github.com/ualia946/k8s-voting-app-orchestration)
     cd k8s-voting-app-orchestration
     ```
 
