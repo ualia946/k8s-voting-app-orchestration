@@ -30,13 +30,11 @@ Una vez desplegada, la aplicación expone dos interfaces web accesibles para el 
 La página principal donde los usuarios pueden emitir su voto.
 
 ![Interfaz de la Aplicación de Votación](images/vote-app-ui.png)
-*(Nota: Reemplaza esto con una captura de pantalla de tu aplicación de votación funcionando).*
 
 #### **Interfaz de Resultados**
 La página que se conecta a la base de datos PostgreSQL para mostrar los resultados de la votación en tiempo real.
 
 ![Interfaz de la Aplicación de Resultados](images/result-app-ui.png)
-*(Nota: Reemplaza esto con una captura de pantalla de tu aplicación de resultados funcionando).*
 
 ---
 
