@@ -75,3 +75,27 @@ Para asegurar la confidencialidad e integridad de los datos en tránsito, se hab
 * **Generación de Certificados:** Se utilizó la herramienta `openssl` para generar un **certificado autofirmado (self-signed)**. Se empleó un único certificado válido para ambos dominios (`vote.local` y `result.local`) mediante el uso de la extensión **Subject Alternative Name (SAN)**, que es la práctica moderna estándar para certificados multidominio.
 * **Almacenamiento Seguro:** El par de clave-certificado se almacenó en el clúster utilizando un `Secret` de Kubernetes de tipo `kubernetes.io/tls`. Este mecanismo desacopla la gestión de los certificados de la configuración del `Ingress`.
 * **Configuración del Ingress:** La sección `spec.tls` del recurso `Ingress` se configuró para hacer referencia al `Secret` creado. Esto le instruye al `Ingress Controller` que termine las conexiones TLS (realice el "saludo" TLS) para los hosts especificados usando el certificado y la clave proporcionados, asegurando que el tráfico entre el cliente y el clúster esté encriptado.
+
+---
+
+### 6. Securización de la Red Interna con Network Policies
+
+Para implementar una estrategia de **Defensa en Profundidad** y adoptar un modelo de **Confianza Cero (Zero Trust)**, se implementó una capa de seguridad de red interna utilizando `Network Policies`. El objetivo era asegurar que, incluso si un componente fuera comprometido, su capacidad para moverse lateralmente dentro del clúster (`lateral movement`) estaría severamente restringida.
+
+#### **Decisión: Habilitar un CNI con Soporte para Políticas**
+
+Por defecto, el driver de red de Minikube no fuerza el cumplimiento de las `Network Policies`. Para habilitar esta funcionalidad, el clúster se inició explícitamente con el **CNI (Container Network Interface) de Calico**. Esta decisión es fundamental, ya que Calico actúa como el "motor" que interpreta y aplica las reglas de firewall definidas en los manifiestos de `NetworkPolicy`.
+
+#### **Estrategia de Implementación**
+
+La implementación siguió un enfoque de "denegar todo por defecto, permitir explícitamente":
+
+1.  **Política Base `default-deny-all`:** Se aplicó una política inicial que selecciona todos los pods (`podSelector: {}`) del `namespace` y bloquea todo el tráfico de `Ingress` y `Egress`. Esto estableció una línea base de aislamiento total, forzando la definición explícita de cada flujo de comunicación necesario.
+
+2.  **Apertura de Flujos de Comunicación Legítimos:** Se crearon políticas granulares para cada flujo de comunicación requerido por la aplicación:
+    * **Acceso Externo:** Se creó una política `Ingress` para permitir la entrada a los pods de `vote-app` y `result-app`, pero **únicamente desde los pods del `namespace` `ingress-nginx`**. Esto asegura que ningún otro pod del clúster pueda acceder directamente a los frontends.
+    * **Comunicación con Bases de Datos:** Se definieron políticas de `Ingress` para `redis` y `postgres` que solo aceptan conexiones desde los pods autorizados (`vote-app`, `worker`, `result-app`).
+    * **Control de Tráfico Saliente (`Egress`):** Se crearon políticas de `Egress` para cada componente de la aplicación (`vote-app`, `worker`, `result-app`). Estas reglas limitan sus conexiones salientes **únicamente a los servicios que necesitan consumir**. Por ejemplo, la política del `vote-app` solo le permite hablar con `redis`, bloqueando cualquier intento de conexión a la base de datos `postgres` o a cualquier otro pod. Esta medida es crucial para contener el "radio de explosión" en caso de que un pod sea comprometido.
+    * **Permiso de DNS:** Todas las políticas de `Egress` incluyen una regla explícita que permite el tráfico saliente por el puerto `53/UDP`. Esto es un detalle crítico, ya que sin acceso al DNS interno del clúster (CoreDNS), los pods no podrían resolver los nombres de los `Services` y toda la comunicación fallaría.
+
+Esta configuración de microsegmentación demuestra una comprensión avanzada de la seguridad en redes nativas de la nube, transformando una aplicación funcional en una arquitectura resiliente y segura.
