@@ -55,3 +55,23 @@ El despliegue de este proyecto presentó múltiples desafíos del mundo real que
 5.  **Diagnóstico Final:** La investigación concluyó que las imágenes de las aplicaciones cliente tenían **credenciales de usuario y contraseña codificadas**, ignorando las variables de entorno inyectadas. La solución final fue adaptar el `Secret` y la inicialización de la base de datos para que coincidieran con estas credenciales codificadas.
 
 Este ciclo de depuración demuestra una comprensión profunda de las herramientas de diagnóstico de Kubernetes y la capacidad de resolver problemas complejos en un sistema distribuido.
+
+---
+
+### 5. Exposición Segura de Servicios con Ingress y TLS
+
+Para llevar el despliegue a un nivel más cercano a la producción, se reemplazó el acceso inicial mediante `Services` de tipo `NodePort` por una solución de enrutamiento de capa 7 centralizada y segura.
+
+#### **Decisión: `Ingress` vs. `NodePort`/`LoadBalancer`**
+
+* **Centralización:** En lugar de exponer un puerto en cada nodo por cada servicio de frontend, se instaló un **Ingress Controller de NGINX**. Este actúa como un único punto de entrada (`Single Point of Entry`) para todo el tráfico HTTP/S, simplificando la gestión de la red y las reglas de firewall.
+* **Enrutamiento Inteligente:** Se creó un único recurso `Ingress` para gestionar el tráfico a los dos frontends. Utilizando el **enrutamiento basado en host**, las peticiones a `vote.local` se dirigen al servicio de votación, mientras que las de `result.local` se dirigen al de resultados. Esto se logra mediante la inspección del `Host header` de la petición HTTP, una funcionalidad de capa 7.
+* **Aislamiento de Servicios:** Al usar `Ingress`, los `Services` de las aplicaciones (`vote-app-service`, `result-service`) pudieron ser cambiados a `ClusterIP`, su tipo por defecto. Esto significa que ya no son accesibles directamente desde la red del nodo, y todo el tráfico debe pasar obligatoriamente por las reglas definidas en el `Ingress`, aumentando la seguridad.
+
+#### **Implementación de TLS (HTTPS)**
+
+Para asegurar la confidencialidad e integridad de los datos en tránsito, se habilitó la encriptación TLS.
+
+* **Generación de Certificados:** Se utilizó la herramienta `openssl` para generar un **certificado autofirmado (self-signed)**. Se empleó un único certificado válido para ambos dominios (`vote.local` y `result.local`) mediante el uso de la extensión **Subject Alternative Name (SAN)**, que es la práctica moderna estándar para certificados multidominio.
+* **Almacenamiento Seguro:** El par de clave-certificado se almacenó en el clúster utilizando un `Secret` de Kubernetes de tipo `kubernetes.io/tls`. Este mecanismo desacopla la gestión de los certificados de la configuración del `Ingress`.
+* **Configuración del Ingress:** La sección `spec.tls` del recurso `Ingress` se configuró para hacer referencia al `Secret` creado. Esto le instruye al `Ingress Controller` que termine las conexiones TLS (realice el "saludo" TLS) para los hosts especificados usando el certificado y la clave proporcionados, asegurando que el tráfico entre el cliente y el clúster esté encriptado.
