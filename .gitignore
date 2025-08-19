@@ -1,0 +1,15 @@
+# Secretos y claves 
+*.key
+*.pem
+
+# Fichero del Secret de Kubernetes con datos Base64
+# Es buena práctica ignorarlo también y generarlo localmente.
+tls-secret.yaml
+
+# Ficheros de estado de herramientas de IaC
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Ficheros de variables sensibles (de tu proyecto anterior de Terraform)
+*.tfvars

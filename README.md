@@ -1,38 +1,32 @@
 # Despliegue de Aplicación de Microservicios con Kubernetes
 
-![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![NGINX](https://img.shields.io/badge/NGINX%20Ingress-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
 
-Este repositorio contiene un conjunto de manifiestos de Kubernetes para desplegar una aplicación de votación distribuida, basada en una arquitectura de microservicios. El proyecto demuestra la orquestación de contenedores, la configuración de redes internas y la gestión de la configuración y los secretos en un entorno de Kubernetes.
+Este repositorio contiene un conjunto de manifiestos de Kubernetes para desplegar una aplicación de votación distribuida y segura. El proyecto demuestra la orquestación de contenedores, la gestión de tráfico con Ingress, la securización con TLS y la depuración sistemática de una arquitectura de microservicios.
 
 **➡️ [Ver la Documentación Técnica Detallada](DOCUMENTACION_DETALLADA.md)**
 
 ---
 
-### 🚀 Arquitectura de la Aplicación
+### 🚀 Arquitectura y Flujo de Tráfico
 
-La aplicación se compone de 5 servicios contenerizados que colaboran para ofrecer una experiencia de votación en tiempo real:
+La aplicación se compone de 5 servicios contenerizados. El tráfico externo es gestionado por un **Ingress Controller de NGINX**, que actúa como único punto de entrada y dirige las peticiones al frontend correspondiente basándose en el `hostname`. La comunicación interna entre componentes es manejada por `Services` de tipo `ClusterIP`.
 
-* **Vote App**: Un frontend web para que los usuarios emitan sus votos.
-* **Redis**: Una base de datos en memoria que actúa como cola para los votos entrantes.
-* **Worker**: Un servicio backend que procesa los votos de la cola de Redis.
-* **Postgres DB**: Una base de datos relacional para el almacenamiento persistente de los votos.
-* **Result App**: Un segundo frontend web que consulta la base de datos y muestra los resultados en vivo.
-
-![Diagrama de Arquitectura de Microservicios en Kubernetes](images/arquitectura-k8s.png)
+![Diagrama de Arquitectura de Microservicios con Ingress](images/arquitectura-k8s.png)
 
 ---
 
 ### 🖼️ Aplicación en Funcionamiento
 
-Una vez desplegada, la aplicación expone dos interfaces web accesibles para el usuario.
+Una vez desplegada, la aplicación expone dos interfaces web seguras (HTTPS), cada una en su propio dominio local.
 
-#### **Interfaz de Votación**
-La página principal donde los usuarios pueden emitir su voto.
+#### **Interfaz de Votación (`https://vote.local`)**
+La página principal donde los usuarios pueden emitir su voto de forma segura.
 
-![Interfaz de la Aplicación de Votación](images/vote-app-ui.png)
+![Interfaz de la Aplicación de Votación](images/https-connection-success.png)
 
-#### **Interfaz de Resultados**
-La página que se conecta a la base de datos PostgreSQL para mostrar los resultados de la votación en tiempo real.
+#### **Interfaz de Resultados (`https://result.local`)**
+La página que muestra los resultados de la votación en tiempo real, con una conexión también encriptada.
 
 ![Interfaz de la Aplicación de Resultados](images/result-app-ui.png)
 
@@ -42,7 +36,9 @@ La página que se conecta a la base de datos PostgreSQL para mostrar los resulta
 
 * **Orquesté una aplicación completa de 5 microservicios**, garantizando la alta disponibilidad y el auto-reparado de cada componente, mediante la escritura de manifiestos declarativos para **Deployments** de Kubernetes.
 
-* **Diseñé un sistema de comunicación de red robusto**, asegurando que las bases de datos permanecieran aisladas de la exposición externa, mediante el uso estratégico de `Services` de tipo **`ClusterIP`** para la comunicación interna y **`NodePort`** para las interfaces de usuario.
+* **Implementé un punto de entrada único y seguro para todo el clúster**, centralizando la gestión del tráfico y habilitando la comunicación encriptada (HTTPS), mediante la configuración de un **Ingress Controller** y la gestión de certificados **TLS** almacenados en `Secrets`.
+
+* **Diseñé un sistema de comunicación de red robusto**, asegurando que las bases de datos permanecieran aisladas de la exposición pública, mediante el uso estratégico de `Services` de tipo **`ClusterIP`** y el enrutamiento de capa 7 del **Ingress**.
 
 * **Centralicé y gestioné la configuración de la aplicación de forma segura**, permitiendo despliegues portátiles y eliminando credenciales del código fuente, mediante la inyección de datos desde objetos **`ConfigMap`** y **`Secret`** como variables de entorno.
 
@@ -53,9 +49,11 @@ La página que se conecta a la base de datos PostgreSQL para mostrar los resulta
 ### 🛠️ Tecnologías Utilizadas
 
 * **Orquestación**: Kubernetes (Minikube)
+* **Redes**: Ingress-NGINX
+* **Seguridad**: TLS/SSL (OpenSSL)
 * **Contenerización**: Docker
 * **Bases de Datos**: PostgreSQL, Redis
-* **Despliegue**: `kubectl` para la aplicación de manifiestos
+* **Despliegue**: `kubectl`
 
 ---
 
@@ -72,21 +70,29 @@ La página que se conecta a la base de datos PostgreSQL para mostrar los resulta
     cd k8s-voting-app-orchestration
     ```
 
-2.  Aplica todos los manifiestos de forma recursiva:
+2.  Habilita el addon de Ingress en Minikube:
+    ```bash
+    minikube addons enable ingress
+    ```
+
+3.  Aplica todos los manifiestos de forma recursiva:
     ```bash
     kubectl apply -f . -R
     ```
 
-3.  Verifica que todos los Pods estén en estado `Running`:
+4.  **Configura tu DNS local.** Obtén la IP de Minikube y añádela a tu fichero `/etc/hosts`.
     ```bash
-    kubectl get pods
+    # 1. Obtén la IP
+    minikube ip
+    # 2. Edita el fichero de hosts con permisos de administrador
+    sudo nano /etc/hosts
+    # 3. Añade estas líneas al final (usando la IP que obtuviste)
+    # 192.168.49.2  vote.local
+    # 192.168.49.2  result.local
     ```
 
-4.  Accede a las aplicaciones. Minikube abrirá automáticamente las URLs en tu navegador:
-    ```bash
-    # Para la aplicación de votación
-    minikube service vote-app-service
+5.  **Accede a las aplicaciones** en tu navegador a través de HTTPS:
+    * `https://vote.local`
+    * `https://result.local`
 
-    # Para la aplicación de resultados
-    minikube service result-service
-    ```
+*(Nota: Tu navegador mostrará una advertencia de seguridad porque el certificado es autofirmado. Debes aceptarla para continuar).*

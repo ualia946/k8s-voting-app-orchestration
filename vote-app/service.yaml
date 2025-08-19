@@ -3,10 +3,8 @@ kind: Service
 metadata:
   name: vote-app-service
 spec:
-  type: NodePort
   selector:
     app: vote-app
   ports:
   - port: 80  
     targetPort: 80
-    nodePort: 30100
