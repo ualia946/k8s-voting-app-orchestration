@@ -66,7 +66,7 @@ La página que muestra los resultados de la votación en tiempo real, con una co
 **Pasos:**
 1.  Clona este repositorio:
     ```bash
-    git clone [https://github.com/ualia946/k8s-voting-app-orchestration](https://github.com/ualia946/k8s-voting-app-orchestration)
+    git clone https://github.com/ualia946/k8s-voting-app-orchestration
     cd k8s-voting-app-orchestration
     ```
 
