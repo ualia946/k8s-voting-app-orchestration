@@ -99,3 +99,26 @@ La implementación siguió un enfoque de "denegar todo por defecto, permitir exp
     * **Permiso de DNS:** Todas las políticas de `Egress` incluyen una regla explícita que permite el tráfico saliente por el puerto `53/UDP`. Esto es un detalle crítico, ya que sin acceso al DNS interno del clúster (CoreDNS), los pods no podrían resolver los nombres de los `Services` y toda la comunicación fallaría.
 
 Esta configuración de microsegmentación demuestra una comprensión avanzada de la seguridad en redes nativas de la nube, transformando una aplicación funcional en una arquitectura resiliente y segura.
+
+---
+
+### 7. Monitorización y Observabilidad con Prometheus y Grafana
+
+Para completar el ciclo de vida de la aplicación, se implementó una pila de monitorización estándar en la industria para proporcionar observabilidad sobre el estado y el rendimiento del clúster y sus componentes.
+
+#### **Decisión: `kube-prometheus-stack` con Helm**
+
+En lugar de construir una solución de monitorización desde cero, se optó por desplegar el chart de Helm `kube-prometheus-stack`. Esta decisión se basa en las siguientes ventajas:
+* **Estándar de la Industria:** Es la colección de herramientas de monitorización para Kubernetes más utilizada y mantenida por la comunidad.
+* **Integración Completa:** Empaqueta no solo Prometheus y Grafana, sino también `Alertmanager` para la gestión de alertas y los `exporters` necesarios (`node-exporter`, `kube-state-metrics`) que se despliegan y configuran automáticamente.
+* **Gestión Simplificada:** El uso de Helm permite instalar, actualizar y gestionar todo el ecosistema de monitorización como una única unidad coherente.
+
+#### **Personalización para Minikube**
+
+Durante la implementación, se detectó que los dashboards de Grafana no mostraban las métricas de consumo de recursos en tiempo real. La depuración reveló que Prometheus no podía "scrapear" los endpoints `/metrics/cadvisor` de los `kubelets` debido a una política de verificación de TLS en Minikube.
+
+La solución fue personalizar el chart de Helm mediante un fichero `values.yaml` para desactivar esta verificación (`insecureSkipVerify: true`), una práctica común y segura en entornos de desarrollo. Este paso demuestra la habilidad de **adaptar una herramienta estándar a las particularidades de un entorno específico**, una tarea diaria en roles de DevOps.
+
+#### **Acceso a Grafana**
+
+Para el acceso a la interfaz de Grafana, que se despliega como un `Service` de tipo `ClusterIP` en su propio `namespace` `monitoring`, se utilizó el comando `kubectl port-forward`. Esta técnica establece un túnel seguro y temporal para el acceso administrativo, sin necesidad de exponer el servicio de forma permanente e insegura con un `NodePort` o `LoadBalancer`.
