@@ -1,104 +1,87 @@
-# Despliegue de Aplicación de Microservicios Segura con Kubernetes
+# Despliegue End-to-End de Microservicios en Azure con Terraform, Kubernetes y CI/CD
 
-![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![NGINX](https://img.shields.io/badge/NGINX%20Ingress-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white) ![Calico](https://img.shields.io/badge/Calico-%23FF6A00.svg?style=for-the-badge&logo=c&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Helm](https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=helm&logoColor=white) ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white) ![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)
-
-Este repositorio contiene un conjunto de manifiestos de Kubernetes para desplegar una aplicación de votación distribuida, segura y observable. El proyecto demuestra la orquestación de contenedores, la gestión de tráfico con **Ingress**, la securización con TLS/Network Policies para conseguir una política  **Zero Trust**, y la **monitorización** completa de una arquitectura de microservicios.
-
-**➡️ [Ver la Documentación Técnica Detallada](DOCUMENTACION_DETALLADA.md)**
+Este proyecto demuestra un flujo de trabajo DevOps completo y automatizado para desplegar una aplicación de microservicios segura, escalable y observable en un entorno de nube profesional. La solución abarca desde la definición de la infraestructura como código (IaC) en Azure con Terraform, hasta la orquestación de contenedores con Kubernetes (AKS) y la automatización del despliegue continuo con GitHub Actions.
 
 ---
 
-### 🚀 Arquitectura y Flujo de Tráfico
+## 🏛️ Arquitectura Global y Flujo CI/CD
 
-La aplicación se compone de 5 servicios contenerizados. El tráfico externo es gestionado por un **Ingress Controller de NGINX**, mientras que la comunicación interna está estrictamente controlada por **Network Policies**. Todo el ecosistema es monitorizado en tiempo real por **Prometheus** y visualizado con **Grafana**.
-
-![Diagrama de Arquitectura de Microservicios con Ingress](images/arquitectura-k8s.png)
+Este diagrama ilustra el ciclo de vida completo del proyecto: desde que un desarrollador empuja código a GitHub hasta que la aplicación está desplegada y monitorizada en Azure Kubernetes Service.
 
 ---
 
-### 🖼️ Aplicación en Funcionamiento
+## ✨ Logros Clave y Habilidades Demostradas
 
-Una vez desplegada, la aplicación expone dos interfaces web seguras (HTTPS), cada una en su propio dominio local.
+He unificado todos los logros de los proyectos anteriores en esta sección. Cada punto es una demostración de impacto tangible, redactado con la fórmula XYZ.
 
-#### **Interfaz de Votación (`https://vote.local`)**
-![Interfaz de la Aplicación de Votación](images/https-connection-success.png)
-
-#### **Interfaz de Resultados (`https://result.local`)**
-![Interfaz de la Aplicación de Resultados](images/result-app-ui.png)
-
-#### **Panel de Monitorización (Grafana)**
-Un dashboard de Grafana que muestra el estado y consumo de recursos del clúster y los pods en tiempo real.
-![Dashboard de Grafana monitorizando el clúster](images/grafana-dashboard.png)
+* **Automaticé** el despliegue completo de una aplicación de microservicios en Azure, **reduciendo el tiempo de puesta en producción de horas a minutos** y eliminando errores manuales, mediante la creación de un pipeline CI/CD con GitHub Actions que aprovisiona la infraestructura con Terraform y despliega los manifiestos en AKS.
+* **Aprovisioné** una infraestructura cloud segura y escalable en Azure, **garantizando un 100% de reproducibilidad y consistencia**, mediante la definición declarativa de todos los recursos (AKS, VNet, ACR, NSGs) como código con Terraform, gestionando el estado de forma remota para facilitar la colaboración.
+* **Implementé** un modelo de seguridad de red de Confianza Cero (Zero Trust), **reduciendo drásticamente la superficie de ataque**, mediante la escritura de Network Policies granulares en Kubernetes que controlan el tráfico de Ingress y Egress para cada microservicio.
+* **Orquesté** una aplicación distribuida de 5 microservicios, **asegurando la alta disponibilidad, escalabilidad y auto-reparación** de cada componente, mediante la escritura de manifiestos declarativos para Deployments, Services y Secrets de Kubernetes.
+* **Establecí** una pila de monitorización y observabilidad completa, **obteniendo visibilidad en tiempo real del estado y consumo de recursos del clúster**, mediante el despliegue de Prometheus y Grafana con Helm, permitiendo la detección proactiva de anomalías.
+* **Optimicé** el ciclo de vida del software, **garantizando la portabilidad y consistencia entre entornos**, mediante la containerización de 5 microservicios con Docker y la gestión centralizada de artefactos en Azure Container Registry (ACR).
+* **Diseñé y depuré** sistemáticamente arquitecturas de red complejas en la nube, **resolviendo problemas de conectividad, DNS y permisos (IAM)**, mediante el análisis de logs y el uso de herramientas de diagnóstico de Azure y kubectl.
 
 ---
 
-### 💡 Logros y Habilidades Demostradas
+## 🚀 Pilares del Proyecto
 
-* **Implementé una pila de monitorización completa**, obteniendo visibilidad en tiempo real del estado y consumo de recursos del clúster, mediante el despliegue de **Prometheus** para la recolección de métricas y **Grafana** para la visualización de dashboards con un chart de **Helm**.
+### 1. Infraestructura como Código (IaC) con Terraform
 
-* **Implementé un modelo de seguridad de red de Confianza Cero (Zero Trust)**, reduciendo drásticamente la superficie de ataque interna, mediante la escritura de **Network Policies** específicas que controlan el tráfico de `Ingress` y `Egress` para cada microservicio.
+La totalidad de la infraestructura de Azure se define de forma declarativa, permitiendo crear, modificar y versionar el entorno de forma segura y eficiente.
 
-* **Orquesté una aplicación completa de 5 microservicios**, garantizando la alta disponibilidad y el auto-reparado de cada componente, mediante la escritura de manifiestos declarativos para **Deployments** de Kubernetes.
+* **Recursos Gestionados:** Azure Kubernetes Service (AKS), Virtual Network (VNet), Subredes, Azure Container Registry (ACR), Network Security Groups (NSG).
+* **Estado Remoto:** El estado de Terraform se almacena en un backend de Azure, permitiendo el trabajo en equipo y la consistencia.
 
-* **Implementé un punto de entrada único y seguro para todo el clúster**, centralizando la gestión del tráfico y habilitando la comunicación encriptada (HTTPS), mediante la configuración de un **Ingress Controller** y la gestión de certificados **TLS** almacenados en `Secrets`.
+### 2. Orquestación Segura con Kubernetes (AKS)
 
-* **Diseñé un sistema de comunicación de red robusto**, asegurando que las bases de datos permanecieran aisladas de la exposición pública, mediante el uso estratégico de `Services` de tipo **`ClusterIP`** y el enrutamiento de capa 7 del **Ingress**.
+La aplicación de microservicios se despliega en AKS, aprovechando las capacidades nativas de Kubernetes para la gestión, seguridad y escalabilidad.
 
-* **Centralicé y gestioné la configuración de la aplicación de forma segura**, permitiendo despliegues portátiles y eliminando credenciales del código fuente, mediante la inyección de datos desde objetos **`ConfigMap`** y **`Secret`** como variables de entorno.
+* **Gestión de Tráfico:** NGINX Ingress Controller para enrutar el tráfico externo de forma centralizada.
+* **Seguridad:** TLS para comunicación HTTPS y Network Policies (Calico) para segmentación de red interna.
+* **Configuración:** ConfigMaps y Secrets para desacoplar la configuración y las credenciales de las imágenes de contenedor.
 
-* **Diagnostiqué y resolví un complejo problema de fallo en cascada**, superando errores de autenticación, DNS e incompatibilidades entre componentes, mediante el análisis sistemático de logs de aplicación y de servidor, y la inspección en vivo de los objetos del clúster con **`kubectl`**.
+### 3. Automatización CI/CD con GitHub Actions
+
+Un pipeline automatizado se encarga de todo el proceso de despliegue, desde la construcción de la imagen hasta la actualización de la aplicación en producción.
+
+* **Disparador:** Se activa automáticamente con cada `git push` a la rama `main`.
+* **Pasos Clave:**
+    1.  Construcción y etiquetado de la imagen Docker.
+    2.  Publicación de la imagen en Azure Container Registry (ACR).
+    3.  Aprovisionamiento o actualización de la infraestructura con Terraform.
+    4.  Despliegue de los manifiestos de Kubernetes en el clúster de AKS.
 
 ---
 
-### 🛠️ Tecnologías Utilizadas
+## 🛠️ Tecnologías Utilizadas
 
-* **Orquestación**: Kubernetes (Minikube)
-* **Redes**: Ingress-NGINX, Calico (CNI)
-* **Seguridad**: Network Policies, TLS/SSL (OpenSSL)
-* **Contenerización**: Docker
-* **Bases de Datos**: PostgreSQL, Redis
-* **Despliegue**: `kubectl`
+| Categoría                 | Tecnologías                                       |
+| ------------------------- | ------------------------------------------------- |
+| **Cloud Provider** | Microsoft Azure                                   |
+| **Infraestructura como Código** | Terraform                                         |
+| **CI/CD** | GitHub Actions                                    |
+| **Orquestación** | Kubernetes (Azure Kubernetes Service - AKS)       |
+| **Contenerización** | Docker                                            |
+| **Redes y Seguridad** | NGINX Ingress, Calico, Network Policies, TLS/SSL  |
+| **Monitorización** | Prometheus, Grafana, Helm                         |
+| **Bases de Datos** | PostgreSQL, Redis                                 |
 
 ---
 
-### ⚙️ Cómo Desplegar
+## 📁 Estructura del Repositorio
 
-**Prerrequisitos:**
-* Tener [**Minikube**](https://minikube.sigs.k8s.io/docs/start/) instalado.
-* Tener [**kubectl**](https://kubernetes.io/docs/tasks/tools/) instalado y configurado.
-
-**Pasos:**
-1.  **Inicia Minikube con el CNI de Calico.**
-    ```bash
-    minikube start --network-plugin=cni --cni=calico
-    ```
-
-2.  Clona este repositorio:
-    ```bash
-    git clone https://github.com/ualia946/k8s-voting-app-orchestration
-    cd k8s-voting-app-orchestration
-    ```
-
-3.  **Habilita el addon de Ingress** y **despliega la pila de monitorización** con Helm:
-    ```bash
-    # Habilitar Ingress
-    minikube addons enable ingress
-    
-    # Desplegar Prometheus y Grafana
-    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-    helm repo update
-    helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace -f values.yaml
-    ```
-
-4.  **Aplica todos los manifiestos** de la aplicación:
-    ```bash
-    kubectl apply -f . -R
-    ```
-
-5.  **Configura tu DNS local** con la IP de Minikube en tu fichero `/etc/hosts`.
-
-6.  **Accede a las aplicaciones** en tu navegador:
-    * `https://vote.local`
-    * `https://result.local`
-
-    *(Nota: Acepta la advertencia de seguridad del certificado autofirmado).*
+```bash
+.
+├── .github/workflows/    
+│   └── deploy.yml
+├── kubernetes/            
+│   ├── vote-app/
+│   ├── result-app/
+│   ├── worker/
+│   └── README_KUBERNETES.md           
+├── terraform/              
+│   ├── main.tf
+│   ├── aks.tf
+│   └── README_TERRAFORM.md           
+└── README.md               
