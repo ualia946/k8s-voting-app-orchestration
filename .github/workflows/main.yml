@@ -2,19 +2,14 @@ name: Inicialización de la Infraestructura
 
 on: workflow_dispatch
 
-#Variables de entorno
+# Variables de entorno para las imágenes
 env:
-  VOTE_APP_IMAGE: kodekloud/examplevotingapp_vote:v1
-  REDIS_IMAGE: redis:8.0-alpine
-  WORKER_IMAGE: dockersamples/examplevotingapp_worker
-  POSTGRES_IMAGE: postgres:16
-  RESULT_IMAGE: kodekloud/examplevotingapp_result:v1
-
-  NAME_VOTE_APP: voteapp:v1
-  NAME_REDIS: redis:v1
-  NAME_WORKER: worker:v1
-  NAME_POSTGRES: postgres:v1
-  NAME_RESULT: result:v1
+  IMAGE_MAP: >-
+    kodekloud/examplevotingapp_vote:v1,voteapp,v1
+    redis:8.0-alpine,redis,v1
+    dockersamples/examplevotingapp_worker,worker,v1
+    postgres:16,postgres,v1
+    kodekloud/examplevotingapp_result:v1,result,v1
   
 jobs:
   create-terraform-backend:
@@ -39,30 +34,27 @@ jobs:
 
       - name: Terraform Deploys Main Infraestructure
         id: acr_output
-        run: | 
-          terraform -chdir=./terraform init
+        working-directory: ./terraform
+        run: |
+          terraform init
           terraform apply -auto-approve
           echo "ACR_NAME=$(terraform output -raw acr_name)" >> $GITHUB_OUTPUT
-          
-      - name: Push Images to ACR Repository
+
+      - name:  Login, Tag, and Push Images to ACR
         run: |
-          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
-          docker pull ${{ env.VOTE_APP_IMAGE }} 
-          docker tag ${{ env.VOTE_APP_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_VOTE_APP }}
+          ACR_NAME="${{ steps.acr_output.outputs.ACR_NAME }}"
+          az acr login --name "$ACR_NAME"
 
-          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
-          docker pull ${{ env.REDIS_MAGE }} 
-          docker tag ${{ env.REDIS_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_REDIS }}
+          #Bucle para procesar cada imagen del mapa
+          for image_pair in ${{ env.IMAGE_MAP }}; do
+            IFS="," read -r public_image new_name new_tag <<< "$image_pair"
 
-          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
-          docker pull ${{ env.WORKER_IMAGE }} 
-          docker tag ${{ env.WORKER_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_WORKER }}
+            full_public_image="$public_image"
+            full_private_image="$ACR_NAME.azurecr.io/$new_name:$new_tag"
 
-          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
-          docker pull ${{ env.POSTGRES_IMAGE }} 
-          docker tag ${{ env.POSTGRES_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_POSTGRES }}
-
-          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
-          docker pull ${{ env.RESULT_IMAGE }} 
-          docker tag ${{ env.RESULT_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_RESULT }}
+            docker pull "$full_public_image"
+            docker tag "$full_public_image" "$full_private_image"
+            docker push "$full_private_image"
+            
+          done
         
