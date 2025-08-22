@@ -76,7 +76,7 @@ Un dashboard de Grafana que muestra el estado y consumo de recursos del clúster
 2.  Clona este repositorio:
     ```bash
     git clone https://github.com/ualia946/k8s-voting-app-orchestration
-    cd k8s-voting-app-orchestration
+    cd k8s-voting-app-orchestration/kubernetes
     ```
 
 3.  **Habilita el addon de Ingress** y **despliega la pila de monitorización** con Helm:
