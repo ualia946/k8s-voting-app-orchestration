@@ -8,7 +8,7 @@ resource "azurerm_storage_account" "tfstate" {
   location = azurerm_resource_group.tfstate.location
   resource_group_name = azurerm_resource_group.tfstate.name
 
-  account_tier = "Basic"
+  account_tier = "Standard"
   account_replication_type = "LRS"
 }
 
