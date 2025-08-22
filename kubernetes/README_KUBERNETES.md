@@ -1,8 +1,8 @@
-# Despliegue de Aplicación de Microservicios Segura con Kubernetes
+# Despliegue de Aplicación de Microservicios Segura con Kubernetes con MINIKUBE en local.
 
 ![Kubernetes](https://img.shields.io/badge/kubernetes-%23326ce5.svg?style=for-the-badge&logo=kubernetes&logoColor=white) ![NGINX](https://img.shields.io/badge/NGINX%20Ingress-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white) ![Calico](https://img.shields.io/badge/Calico-%23FF6A00.svg?style=for-the-badge&logo=c&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Helm](https://img.shields.io/badge/Helm-0F1689?style=for-the-badge&logo=helm&logoColor=white) ![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white) ![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)
 
-Este repositorio contiene un conjunto de manifiestos de Kubernetes para desplegar una aplicación de votación distribuida, segura y observable. El proyecto demuestra la orquestación de contenedores, la gestión de tráfico con **Ingress**, la securización con TLS/Network Policies para conseguir una política  **Zero Trust**, y la **monitorización** completa de una arquitectura de microservicios.
+Esta carpeta contiene un conjunto de archivos de Kubernetes para desplegar una aplicación de votación distribuida, segura y observable. El proyecto demuestra la orquestación de contenedores, la gestión de tráfico con **Ingress**, la securización con TLS/Network Policies para conseguir una política  **Zero Trust**, y la **monitorización** completa de una arquitectura de microservicios.
 
 **➡️ [Ver la Documentación Técnica Detallada](DOCUMENTACION_DETALLADA.md)**
 
