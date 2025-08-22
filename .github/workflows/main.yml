@@ -1,0 +1,68 @@
+name: Inicialización de la Infraestructura
+
+on: workflow_dispatch
+
+#Variables de entorno
+env:
+  VOTE_APP_IMAGE: kodekloud/examplevotingapp_vote:v1
+  REDIS_IMAGE: redis:8.0-alpine
+  WORKER_IMAGE: dockersamples/examplevotingapp_worker
+  POSTGRES_IMAGE: postgres:16
+  RESULT_IMAGE: kodekloud/examplevotingapp_result:v1
+
+  NAME_VOTE_APP: voteapp:v1
+  NAME_REDIS: redis:v1
+  NAME_WORKER: worker:v1
+  NAME_POSTGRES: postgres:v1
+  NAME_RESULT: result:v1
+  
+jobs:
+  create-terraform-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5.0.0
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
+
+      - name: Terraform Installation
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Inits Backend
+        run: terraform -chdir=./terraform/backend init
+
+      - name: Terraform Creates remote tfstate
+        run: terraform -chdir=./terraform/backend apply -auto-approve
+
+      - name: Terraform Deploys Main Infraestructure
+        id: acr_output
+        run: | 
+          terraform -chdir=./terraform init
+          terraform apply -auto-approve
+          echo "ACR_NAME=$(terraform output -raw acr_name)" >> $GITHUB_OUTPUT
+          
+      - name: Push Images to ACR Repository
+        run: |
+          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
+          docker pull ${{ env.VOTE_APP_IMAGE }} 
+          docker tag ${{ env.VOTE_APP_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_VOTE_APP }}
+
+          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
+          docker pull ${{ env.REDIS_MAGE }} 
+          docker tag ${{ env.REDIS_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_REDIS }}
+
+          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
+          docker pull ${{ env.WORKER_IMAGE }} 
+          docker tag ${{ env.WORKER_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_WORKER }}
+
+          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
+          docker pull ${{ env.POSTGRES_IMAGE }} 
+          docker tag ${{ env.POSTGRES_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_POSTGRES }}
+
+          az acr login --name ${{ steps.acr_output.outputs.ACR_NAME }}
+          docker pull ${{ env.RESULT_IMAGE }} 
+          docker tag ${{ env.RESULT_IMAGE }} ${{ steps.acr_output.outputs.ACR_NAME }}.azurecr.io/${{ env.NAME_RESULT }}
+        
