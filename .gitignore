@@ -11,5 +11,5 @@ tls-secret.yaml
 *.tfstate
 *.tfstate.backup
 
-# Ficheros de variables sensibles (de tu proyecto anterior de Terraform)
+# Ficheros de variables sensibles 
 *.tfvars
