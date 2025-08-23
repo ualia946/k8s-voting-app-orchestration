@@ -12,8 +12,6 @@ Este diagrama ilustra el ciclo de vida completo del proyecto: desde que un desar
 
 ## ✨ Logros Clave y Habilidades Demostradas
 
-He unificado todos los logros de los proyectos anteriores en esta sección. Cada punto es una demostración de impacto tangible, redactado con la fórmula XYZ.
-
 * **Automaticé** el despliegue completo de una aplicación de microservicios en Azure, **reduciendo el tiempo de puesta en producción de horas a minutos** y eliminando errores manuales, mediante la creación de un pipeline CI/CD con GitHub Actions que aprovisiona la infraestructura con Terraform y despliega los manifiestos en AKS.
 * **Aprovisioné** una infraestructura cloud segura y escalable en Azure, **garantizando un 100% de reproducibilidad y consistencia**, mediante la definición declarativa de todos los recursos (AKS, VNet, ACR, NSGs) como código con Terraform, gestionando el estado de forma remota para facilitar la colaboración.
 * **Implementé** un modelo de seguridad de red de Confianza Cero (Zero Trust), **reduciendo drásticamente la superficie de ataque**, mediante la escritura de Network Policies granulares en Kubernetes que controlan el tráfico de Ingress y Egress para cada microservicio.
