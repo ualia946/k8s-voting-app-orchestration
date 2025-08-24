@@ -13,3 +13,5 @@ tls-secret.yaml
 
 # Ficheros de variables sensibles 
 *.tfvars
+
+secrets/*
