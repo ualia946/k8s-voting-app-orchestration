@@ -48,6 +48,8 @@ Un dashboard de Grafana que muestra el estado y consumo de recursos del clúster
 
 * **Diagnostiqué y resolví un complejo problema de fallo en cascada**, superando errores de autenticación, DNS e incompatibilidades entre componentes, mediante el análisis sistemático de logs de aplicación y de servidor, y la inspección en vivo de los objetos del clúster con **`kubectl`**.
 
+* **Gestioné configuraciones para múltiples entornos (test/producción) de forma declarativa y escalable**, mediante la implementación de Kustomize para estructurar los manifiestos en una base común y overlays específicos, resultando en la eliminación total de código duplicado, la automatización de la personalización por entorno (ej. réplicas, configuraciones) y un proceso de despliegue seguro y repetible.
+
 ---
 
 ### 🛠️ Tecnologías Utilizadas

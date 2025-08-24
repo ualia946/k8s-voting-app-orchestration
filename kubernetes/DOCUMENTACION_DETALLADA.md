@@ -2,7 +2,7 @@
 
 ## Introducción
 
-Este documento profundiza en las decisiones técnicas, la arquitectura y el proceso de depuración seguido para el despliegue de la aplicación de votación de microservicios. El objetivo es detallar el razonamiento detrás de las configuraciones de Kubernetes y demostrar una comprensión práctica de los principios de orquestación de contenedores en un entorno distribuido.
+Este documento profundiza en las decisiones técnicas, la arquitectura y el proceso de depuración seguido para el despliegiegue de la aplicación de votación de microservicios. El objetivo es detallar el razonamiento detrás de las configuraciones de Kubernetes y demostrar una comprensión práctica de los principios de orquestación de contenedores en un entorno distribuido.
 
 ---
 
@@ -20,15 +20,18 @@ La decisión de usar Kubernetes para este proyecto se basa en su capacidad para 
 Cada componente fue encapsulado en su propio conjunto de manifiestos de Kubernetes para promover la modularidad y la gestión independiente.
 
 #### **PostgreSQL (`db`)**
+
 * **Configuración Explícita:** El `Deployment` de PostgreSQL se configuró explícitamente con todas las variables de entorno necesarias (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). Esta decisión evita depender de los valores por defecto de la imagen de Docker, lo que garantiza un **proceso de inicialización determinista y predecible**. Se eliminó la ambigüedad para asegurar que las credenciales de creación fueran idénticas a las de conexión.
 * **Gestión de Credenciales:** El usuario y la contraseña se extrajeron a un objeto `Secret`, asegurando que ninguna información sensible estuviera codificada en el manifiesto del `Deployment`.
 * **Versión de la Imagen:** Se fijó la imagen en `postgres:16` para garantizar la reproducibilidad del entorno y evitar fallos inesperados causados por actualizaciones automáticas de la etiqueta `:latest`.
 
 #### **Redis**
+
 * **Rol en la Arquitectura:** Redis se utilizó como una cola de mensajes y caché en memoria, actuando como un intermediario de alta velocidad entre la aplicación de votación y el `worker`. Esto **desacopla el frontend del backend**, permitiendo que la aplicación de votación responda instantáneamente sin esperar a la escritura en la base de datos persistente.
 * **Autenticación:** La imagen estándar de Redis se desplegó sin autenticación, una práctica común para componentes internos dentro de una red de clúster segura y de confianza.
 
 #### **Worker (El Procesador en Segundo Plano)**
+
 * **Ausencia de `Service`:** **Esta es una decisión de diseño deliberada.** El `worker` no tiene un `Service` asociado porque es un componente puramente **cliente**. No expone ningún puerto ni espera conexiones entrantes. Su función es iniciar conexiones hacia Redis (para leer votos) y hacia PostgreSQL (para escribirlos). Crear un `Service` para él sería innecesario y conceptualmente incorrecto, ya que no hay nada que "descubrir".
 * **Dependencia de Componentes Externos:** El `worker` depende críticamente de la disponibilidad de Redis y PostgreSQL. Su código incluye una lógica de reintento (`Waiting for db`), lo que demuestra un patrón de resiliencia.
 
@@ -122,3 +125,34 @@ La solución fue personalizar el chart de Helm mediante un fichero `values.yaml`
 #### **Acceso a Grafana**
 
 Para el acceso a la interfaz de Grafana, que se despliega como un `Service` de tipo `ClusterIP` en su propio `namespace` `monitoring`, se utilizó el comando `kubectl port-forward`. Esta técnica establece un túnel seguro y temporal para el acceso administrativo, sin necesidad de exponer el servicio de forma permanente e insegura con un `NodePort` o `LoadBalancer`.
+
+---
+
+### 8. Gestión de Configuraciones Multi-Entorno con Kustomize
+
+Para evolucionar el proyecto de un simple despliegue a una configuración robusta y mantenible, se abandonó el uso de `kubectl apply -f` en favor de una estrategia de gestión de configuración declarativa con **Kustomize**. El objetivo era resolver los desafíos inherentes a la gestión de múltiples entornos (`test`, `production`, etc.) sin duplicar el código.
+
+#### **Decisión: Kustomize como Herramienta Nativa de Kubernetes**
+
+La elección de Kustomize se basó en su simplicidad y su integración nativa con `kubectl` (`kubectl apply -k`). A diferencia de otras herramientas, no requiere un lenguaje de plantillas, lo que mantiene los manifiestos de Kubernetes como la única fuente de verdad y reduce la complejidad.
+
+#### **Estrategia de Implementación: `base` y `overlays`**
+
+La configuración se refactorizó siguiendo el patrón estándar y más potente de Kustomize:
+
+1.  **Estructura `base`:** Todos los manifiestos YAML originales y comunes para cualquier entorno (Deployments, Services, Ingress, Network Policies, etc.) se movieron a un directorio `base`. Este directorio contiene un `kustomization.yaml` que actúa como el "índice" de todos los recursos que componen la aplicación principal.
+
+2.  **Estructura `overlays`:** Se creó un directorio `overlays` para contener las personalizaciones de cada entorno.
+    * **Overlay `test`:** Este entorno representa la configuración base sin modificaciones. Su `kustomization.yaml` simplemente hace referencia a la `base` (`resources: - ../../base`), heredando toda la configuración por defecto.
+    * **Overlay `production`:** Este entorno introduce cambios específicos. Su `kustomization.yaml` también hereda de la `base`, pero además aplica **parches** para modificar los recursos base. Por ejemplo, se utiliza un parche para incrementar el número de `replicas` del `vote-app-deployment` a `5`, asegurando una mayor disponibilidad sin tener que copiar y modificar el archivo de `Deployment` completo.
+
+#### **Automatización con Generadores**
+
+Para mejorar la seguridad y la mantenibilidad, los `ConfigMaps` y `Secrets` estáticos se reemplazaron por generadores de Kustomize:
+
+* **`configMapGenerator`:** Se utilizó para crear el `ConfigMap` de la aplicación a partir de un archivo `.env` externo. Esto separa la configuración (los valores) de la definición de la infraestructura (los manifiestos).
+* **`secretGenerator`:** Se empleó para generar todos los `Secrets` (credenciales de la base de datos y certificados TLS) a partir de archivos locales (`.txt`, `.crt`, `.key`). Estos archivos fuente se añadieron al `.gitignore` para asegurar que ninguna información sensible sea versionada en el repositorio.
+
+La principal ventaja de los generadores es que añaden un **sufijo hash** al nombre del `ConfigMap` o `Secret` generado. Si el contenido de los archivos fuente cambia, el hash cambia, se crea un nuevo recurso y Kustomize actualiza automáticamente los `Deployments` para que lo utilicen, provocando un **despliegue controlado (rolling update)**. Esto automatiza las actualizaciones de configuración de forma segura y fiable.
+
+Esta implementación de Kustomize demuestra una comprensión de los principios de **GitOps** y la gestión de configuración como código, transformando un conjunto de archivos estáticos en un sistema de despliegue dinámico, seguro y fácil de mantener para múltiples entornos.
