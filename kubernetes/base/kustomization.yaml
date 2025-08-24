@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ingress-rules/ingress.yaml
+  - network-policies/allow-egress-result.yaml
+  - network-policies/allow-egress-voteapp.yaml
+  - network-policies/allow-egress-worker.yaml
+  - network-policies/allow-ingress-postgres.yaml
+  - network-policies/allow-ingress-redis.yaml
+  - network-policies/allow-ingress-to-frontend.yaml
+  - network-policies/default-deny-all.yaml
+  - postgres/postgres.yaml
+  - redis/redis.yaml
+  - redis/service.yaml
+  - result-app/result-app.yaml
+  - result-app/service.yaml
+  - vote-app/vote-app.yaml
+  - vote-app/service.yaml
+  - worker/worker.yaml
+
+commonLabels:
+  propietario: Ivelin
+
+
+configMapGenerator:
+  - name: config-map
+    envs:
+    - ./config-map.env
+
+secretGenerator:
+  - name: vote-tls-secret
+    type: kubernetes.io/tls
+    files:
+    - secrets/tls.crt
+    - secrets/tls.key
+
+  - name: secret-postgres
+    files:
+      - user=secrets/postgres_user.txt
+      - password=secrets/postgres_password.txt
