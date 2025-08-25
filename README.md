@@ -77,9 +77,10 @@ Un pipeline automatizado se encarga de todo el proceso de despliegue, desde la c
 │   ├── vote-app/
 │   ├── result-app/
 │   ├── worker/
-│   └── README_KUBERNETES.md           
+│   ├── README_KUBERNETES.md
+│   └── ...              
 ├── terraform/              
 │   ├── main.tf
 │   ├── aks.tf
-│   └── README_TERRAFORM.md           
+│   └── ...          
 └── README.md               
